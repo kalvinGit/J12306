@@ -12,6 +12,7 @@ import com.kalvin.J12306.config.ConfigConst;
 import com.kalvin.J12306.config.Constants;
 import com.kalvin.J12306.config.UrlsEnum;
 import com.kalvin.J12306.dto.SubmitTicketInfoDTO;
+import com.kalvin.J12306.exception.J12306Exception;
 import com.kalvin.J12306.http.Session;
 import com.kalvin.J12306.utils.J12306Util;
 
@@ -116,7 +117,11 @@ public class ConfirmSingleForQueue {
                 log.info("正式下单失败，错误信息：{}。此列车{}加入小黑屋闭关3分钟", parse.getByPath("messages"), this.trainNum);
             }
         } catch (Exception e) {
-            log.info("正式下单异常：", e.getMessage());
+            if (e instanceof J12306Exception) {
+                throw new J12306Exception(e.getMessage());
+            } else {
+                log.info("正式下单异常：{}", e.getMessage());
+            }
         }
 
     }

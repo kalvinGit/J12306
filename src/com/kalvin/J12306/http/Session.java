@@ -119,6 +119,10 @@ public class Session {
         public void setHeader(HashMap<String, String> headers) {
             headers.forEach((k, v) -> this.httpRequest.header(k, v));
         }
+
+        public String getHeadder(String name) {
+            return this.httpRequest.header(name);
+        }
     }
 
 }

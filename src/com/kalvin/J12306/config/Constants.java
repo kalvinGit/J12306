@@ -25,4 +25,6 @@ public class Constants {
 
     public final static int MAX_TRY_TIMES = 20;
 
+    public final static String THREAD_STOP = "STOP";
+
 }

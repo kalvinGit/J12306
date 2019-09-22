@@ -7,6 +7,7 @@ import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import com.kalvin.J12306.config.UrlsEnum;
 import com.kalvin.J12306.dto.SubmitTicketInfoDTO;
+import com.kalvin.J12306.exception.J12306Exception;
 import com.kalvin.J12306.http.Session;
 
 import java.util.HashMap;
@@ -94,7 +95,11 @@ public class CheckOrderInfo {
                 log.info("车票提交失败，正在重试...");
             }
         } catch (Exception e) {
-            log.info("车票提交异常，正在重试...错误信息：{}", e.getMessage());
+            if (e instanceof J12306Exception) {
+                throw new J12306Exception(e.getMessage());
+            } else {
+                log.info("车票提交异常，正在重试...错误信息：{}", e.getMessage());
+            }
         }
 
     }

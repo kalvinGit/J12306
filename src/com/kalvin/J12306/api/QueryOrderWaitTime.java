@@ -85,7 +85,7 @@ public class QueryOrderWaitTime {
             log.info("恭喜您订票成功，订单号为：{}, 请立即打开浏览器登录12306，访问‘未完成订单’，在30分钟内完成支付!", orderId);
             log.info("以邮件方式通知抢票人");
             J12306Util.sendSuccessEmail(orderId);
-            throw new J12306Exception("订票成功，结束抢票程序！");
+            throw new J12306Exception(Constants.THREAD_STOP);
         } else {
             // todo 有些情况排队失败也会订票成功，所有此处查询一下用户订单信息
             log.info("有些情况排队失败也会订票成功，所以建议您登录12306检查下未完成的订单。。。");

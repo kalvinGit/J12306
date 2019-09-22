@@ -9,7 +9,7 @@ public enum UrlsEnum {
     LOG_DEVICE(new UrlConfig(   // 设备信息
             "https://kyfw.12306.cn/otn/HttpZF/logdevice",   // url地址
             "get",  // 请求方法
-            "https://kyfw.12306.cn/otn/passport?redirect=/otn/" // referer
+            "https://kyfw.12306.cn/otn/login/init" // referer
     )),
     LOGIN_INIT(new UrlConfig(   // 登录页
             "https://kyfw.12306.cn/otn/login/init",

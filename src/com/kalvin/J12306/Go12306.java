@@ -97,7 +97,7 @@ public class Go12306 {
 //        String[] split = this.trainDates.split(",");
 //        int len = split.length;
 //        ExecutorService executorService = Executors.newFixedThreadPool(len);
-        while (true) {
+        stopLop: while (true) {
             HttpResponse httpResponse = ticket.query();
             String body = httpResponse.body();
 //            log.info("query tickets status = {}，body={}", httpResponse.getStatus(), body);
@@ -188,8 +188,8 @@ public class Go12306 {
                                 }
                             }
                         } catch (J12306Exception e) {
-                            log.info("J12306Exception e={}", e.getMsg());
-                            break;
+                            log.info("抢票程序结束：{}", e.getMsg());
+                            break stopLop;
                         }
 
                     }

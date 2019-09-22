@@ -5,7 +5,6 @@ package com.kalvin.J12306.exception;
  * Create by Kalvin on 2019/9/19.
  */
 public class J12306Exception extends RuntimeException {
-    private int errorCode;
     private String msg;
 
     public J12306Exception(String message) {
@@ -13,13 +12,14 @@ public class J12306Exception extends RuntimeException {
         this.msg = message;
     }
 
-    public J12306Exception(String message, Throwable cause) {
-        super(message, cause);
+    public J12306Exception(int errorCode, String message) {
+        super(message);
         this.msg = message;
     }
 
-    public int getErrorCode() {
-        return errorCode;
+    public J12306Exception(String message, Throwable cause) {
+        super(message, cause);
+        this.msg = message;
     }
 
     public String getMsg() {

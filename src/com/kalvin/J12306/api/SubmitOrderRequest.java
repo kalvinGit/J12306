@@ -9,6 +9,7 @@ import cn.hutool.log.LogFactory;
 import com.kalvin.J12306.config.Constants;
 import com.kalvin.J12306.config.UrlsEnum;
 import com.kalvin.J12306.dto.SubmitTicketInfoDTO;
+import com.kalvin.J12306.exception.J12306Exception;
 import com.kalvin.J12306.http.Session;
 import com.kalvin.J12306.utils.StationUtil;
 
@@ -94,7 +95,11 @@ public class SubmitOrderRequest {
                 }
             }
         } catch (Exception e) {
-            log.info("订单提交异常，正在重试...错误信息：{}", e.getMessage());
+            if (e instanceof J12306Exception) {
+                throw new J12306Exception(e.getMessage());
+            } else {
+                log.info("订单提交异常，正在重试...错误信息：{}", e.getMessage());
+            }
         }
 
     }

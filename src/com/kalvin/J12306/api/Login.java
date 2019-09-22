@@ -53,6 +53,10 @@ public class Login {
             String body = httpResponse.body();
 //            log.info("login body={}", body);
 
+            if (StrUtil.isBlank(body)) {
+                throw new J12306Exception("登录失败，可能需要设置RAIL_EXPIRATION cookie值！");
+            }
+
             JSONObject jsonObject = JSONUtil.parseObj(body);
             Integer resultCode = (Integer) jsonObject.get("result_code");
             if (resultCode == 0) {   // 登录成功，获取tk
@@ -74,6 +78,12 @@ public class Login {
     }
 
     private void initLogDevice() {
+        /*String userAgent = this.session.httpClient.getHeadder("User-Agent");
+        UrlConfig urlConfig = UrlsEnum.LOG_DEVICE.getUrlConfig();
+        urlConfig.setUrl(urlConfig.getUrl()
+                .replace("{0}", userAgent)
+                .replace("{1}", String.valueOf(System.currentTimeMillis())));
+        UrlsEnum.LOG_DEVICE.setUrlConfig(urlConfig);*/
         HttpResponse httpResponse = this.session.httpClient.send(UrlsEnum.LOG_DEVICE);
         String body = httpResponse.body();
 //        log.info("deviceInfo body = {}", body);
@@ -84,8 +94,8 @@ public class Login {
         // 设置到session的cookie中
         String railExpiration = jsonObject.get("exp").toString();
         String railDeviceId = jsonObject.get("dfp").toString();
-        // todo railDeviceId
-        railDeviceId = "oL0EiDIpSoF3hTcOmgROih1TZS_Pd2YfKFLZJPftrOKphLUdXKEBrBh59ay4T6J1xNA7q6mif-qQrlXnYQYrbCBxbmQ6TU5ZV6Q9EOLohmKxowKP7niwJ-POTI7JKKXHm-GQvZLqoGQ08GMdBKDbz5nxjrmI7jNy";
+        // todo 目前可用的railDeviceId暂时还没获取到，可手动配置，如下即可完成登录
+//        railDeviceId = "oL0EiDIpSoF3hTcOmgROih1TZS_Pd2YfKFLZJPftrOKphLUdXKEBrBh59ay4T6J1xNA7q6mif-qQrlXnYQYrbCBxbmQ6TU5ZV6Q9EOLohmKxowKP7niwJ-POTI7JKKXHm-GQvZLqoGQ08GMdBKDbz5nxjrmI7jNy";
         this.session.setCookie("RAIL_EXPIRATION=" + railExpiration);
         this.session.setCookie("RAIL_DEVICEID=" + railDeviceId);
     }
@@ -132,7 +142,6 @@ public class Login {
      * 获取权限
      */
     private boolean postUamAuthClient() {
-        log.info("session tk = {}", this.session.token);
         HashMap<String, Object> formData = new HashMap<>();
         formData.put("tk", this.session.token);
         HttpResponse httpResponse = this.session.httpClient.send(UrlsEnum.UAM_AUTH_CLIENT, formData);
@@ -151,7 +160,7 @@ public class Login {
     private UserInfoDTO getUserInfo() {
         HttpResponse httpResponse = this.session.httpClient.send(UrlsEnum.GET_USER_INFO);
         String body = httpResponse.body();
-        log.info("queryPassengerInfo body={}", body);
+//        log.info("queryPassengerInfo body={}", body);
         JSON parse = JSONUtil.parse(body);
         JSONObject object = (JSONObject) parse.getByPath("data.userDTO.loginUserDTO");
         UserInfoDTO userInfo = new UserInfoDTO();
