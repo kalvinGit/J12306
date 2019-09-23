@@ -7,7 +7,7 @@ package com.kalvin.J12306.config;
 public enum UrlsEnum {
 
     LOG_DEVICE(new UrlConfig(   // 设备信息
-            "https://kyfw.12306.cn/otn/HttpZF/logdevice",   // url地址
+            "https://kyfw.12306.cn/otn/HttpZF/logdevice?algID=SB8fX7Pxdo&hashCode=hGI8VBr0Z-RqCa46_l2YH6QDnUMDILT8N2bLl_aWs6Q&FMQw=0&q4f3=zh-CN&VPIf=1&custID=133&VEek=unknown&dzuS=0&yD16=0&EOQP=8f58b1186770646318a429cb33977d8c&jp76=52d67b2a5aa5e031084733d5006cc664&hAqN=Win32&platform=WEB&ks0Q=d22ca0b81584fbea62237b14bd04c866&TeRS=1040x1920&tOHY=24xx1080x1920&Fvje=i1l1o1s1&q5aJ=-8&wNLf=99115dfb07133750ba677d055874de87&0aew={0}&E3gR=9564647ce82bb8fb9e3489ea64d9ee3d&timestamp={1}",   // url地址
             "get",  // 请求方法
             "https://kyfw.12306.cn/otn/login/init" // referer
     )),

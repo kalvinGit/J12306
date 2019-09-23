@@ -7,6 +7,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
+import com.kalvin.J12306.config.UrlConfig;
 import com.kalvin.J12306.config.UrlsEnum;
 import com.kalvin.J12306.dto.UserInfoDTO;
 import com.kalvin.J12306.exception.J12306Exception;
@@ -37,10 +38,11 @@ public class Login {
         HttpResponse initRes = this.session.httpClient.send(UrlsEnum.LOGIN_INIT);
         this.session.setCookie(initRes.getCookies());
         log.info("进入12306登录页，状态码：{}", initRes.getStatus());
-        this.initLogDevice();
         Captcha captcha = new Captcha(this.session);
         // 获取登录验证码
         captcha.getLoginCaptchaImg();
+        // 获取deviceId
+        this.initLogDevice();
         // 校验登录验证码
         if (captcha.checkLoginCaptchaImg()) {
             log.info("验证码通过，开始密码登录");
@@ -78,13 +80,14 @@ public class Login {
     }
 
     private void initLogDevice() {
-        /*String userAgent = this.session.httpClient.getHeadder("User-Agent");
+        String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36";
+        Session ldSession = new Session();
         UrlConfig urlConfig = UrlsEnum.LOG_DEVICE.getUrlConfig();
         urlConfig.setUrl(urlConfig.getUrl()
                 .replace("{0}", userAgent)
                 .replace("{1}", String.valueOf(System.currentTimeMillis())));
-        UrlsEnum.LOG_DEVICE.setUrlConfig(urlConfig);*/
-        HttpResponse httpResponse = this.session.httpClient.send(UrlsEnum.LOG_DEVICE);
+        UrlsEnum.LOG_DEVICE.setUrlConfig(urlConfig);
+        HttpResponse httpResponse = ldSession.httpClient.send(UrlsEnum.LOG_DEVICE);
         String body = httpResponse.body();
 //        log.info("deviceInfo body = {}", body);
         String startIdxStr = "{";
@@ -94,8 +97,7 @@ public class Login {
         // 设置到session的cookie中
         String railExpiration = jsonObject.get("exp").toString();
         String railDeviceId = jsonObject.get("dfp").toString();
-        // todo 目前可用的railDeviceId暂时还没获取到，可手动配置，如下即可完成登录
-//        railDeviceId = "oL0EiDIpSoF3hTcOmgROih1TZS_Pd2YfKFLZJPftrOKphLUdXKEBrBh59ay4T6J1xNA7q6mif-qQrlXnYQYrbCBxbmQ6TU5ZV6Q9EOLohmKxowKP7niwJ-POTI7JKKXHm-GQvZLqoGQ08GMdBKDbz5nxjrmI7jNy";
+//        log.info("railDeviceId={}", railDeviceId);
         this.session.setCookie("RAIL_EXPIRATION=" + railExpiration);
         this.session.setCookie("RAIL_DEVICEID=" + railDeviceId);
     }

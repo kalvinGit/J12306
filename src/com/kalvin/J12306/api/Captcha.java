@@ -6,7 +6,6 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.kalvin.J12306.AI.Easy12306AI;
 import com.kalvin.J12306.AI.ImageAI;
-import com.kalvin.J12306.config.ConfigConst;
 import com.kalvin.J12306.config.Constants;
 import com.kalvin.J12306.config.UrlConfig;
 import com.kalvin.J12306.config.UrlsEnum;
@@ -39,7 +38,7 @@ public class Captcha {
         UrlsEnum.CAPTCHA.setUrlConfig(urlConfig);
         HttpResponse httpResponse = session.httpClient.sendAsync(UrlsEnum.CAPTCHA);
         this.loginCaptchaImageName = this.getNewLoginCaptchaImgFileName();
-        httpResponse.writeBody(new File(ConfigConst.CAPTCHA_IMG_PRE_PATH + this.loginCaptchaImageName));
+        httpResponse.writeBody(new File(Constants.CAPTCHA_IMG_PRE_PATH + this.loginCaptchaImageName));
     }
 
     /**
@@ -51,14 +50,14 @@ public class Captcha {
         UrlsEnum.GET_PASSCODE_NEW.setUrlConfig(urlConfig);
         HttpResponse httpResponse = session.httpClient.sendAsync(UrlsEnum.GET_PASSCODE_NEW);
         this.orderCaptchaImageName = this.getNewOrderCaptchaImgFileName();
-        httpResponse.writeBody(new File(ConfigConst.CAPTCHA_IMG_PRE_PATH + this.orderCaptchaImageName));
+        httpResponse.writeBody(new File(Constants.CAPTCHA_IMG_PRE_PATH + this.orderCaptchaImageName));
         return this.orderCaptchaImageName;
     }
 
     public boolean checkLoginCaptchaImg() {
         J12306Util.sleep(2);
         // 若需要使用其它打码平台AI，在AI包下新增一个类实现ImageAI接口并更换下面图片AI实例即可
-        ImageAI imageAI = new Easy12306AI(Constants.IMAGE_AI_URL, ConfigConst.CAPTCHA_IMG_PRE_PATH + this.loginCaptchaImageName);
+        ImageAI imageAI = new Easy12306AI(Constants.IMAGE_AI_URL, Constants.CAPTCHA_IMG_PRE_PATH + this.loginCaptchaImageName);
         String code = imageAI.printCode();
         // 转化为图片坐标点
         String answerCode = J12306Util.getCaptchaPos(code);

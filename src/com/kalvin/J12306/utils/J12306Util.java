@@ -4,14 +4,12 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.mail.MailUtil;
 import cn.hutool.json.JSON;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
-import com.kalvin.J12306.config.ConfigConst;
 import com.kalvin.J12306.dto.TicketInfoDTO;
 
 import java.io.UnsupportedEncodingException;
@@ -120,14 +118,9 @@ public class J12306Util {
     public static void sendSuccessEmail(String orderId) {
         // 订票成功，使用邮件通知抢票人
         try {
-            if ("".equals(ConfigConst.EMAIL)) {
-                log.info("你未配置邮件地址，请在ConfigConst配置类中配置");
-                return;
-            }
-            MailUtil.sendText(ConfigConst.EMAIL, "12306抢票成功",
-                    "恭喜您订票成功，订单号为：" + orderId + ", 请立即打开浏览器登录12306，访问‘未完成订单’，在30分钟内完成支付!");
+            EmailUtil.send("12306抢票成功", "恭喜您订票成功，订单号为：" + orderId + ", 请立即打开浏览器登录12306，访问‘未完成订单’，在30分钟内完成支付!");
         } catch (Exception e) {
-            log.info("无法通过邮件通知您，请确保mail.setting相关配置正确！error：" + e.getMessage());
+            log.info("无法通过邮件通知您，请检查config.yml配置文件，确保邮件相关配置正确！error：" + e.getMessage());
         }
     }
 

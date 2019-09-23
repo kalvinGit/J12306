@@ -8,7 +8,6 @@ import cn.hutool.log.LogFactory;
 import com.kalvin.J12306.AI.Easy12306AI;
 import com.kalvin.J12306.AI.ImageAI;
 import com.kalvin.J12306.cache.TicketCache;
-import com.kalvin.J12306.config.ConfigConst;
 import com.kalvin.J12306.config.Constants;
 import com.kalvin.J12306.config.UrlsEnum;
 import com.kalvin.J12306.dto.SubmitTicketInfoDTO;
@@ -61,7 +60,7 @@ public class ConfirmSingleForQueue {
                 String orderCaptchaImg = captcha.getOrderCaptchaImg();
                 for (int i = 0; i < 3; i++) {
                     // 若需要使用其它打码平台AI，在AI包下新增一个类实现ImageAI接口并更换下面图片AI实例即可
-                    ImageAI imageAI = new Easy12306AI(Constants.IMAGE_AI_URL, ConfigConst.CAPTCHA_IMG_PRE_PATH + orderCaptchaImg);
+                    ImageAI imageAI = new Easy12306AI(Constants.IMAGE_AI_URL, Constants.CAPTCHA_IMG_PRE_PATH + orderCaptchaImg);
                     String code = imageAI.printCode();
                     // 转化为图片坐标点
                     randCode = J12306Util.getCaptchaPos(code);

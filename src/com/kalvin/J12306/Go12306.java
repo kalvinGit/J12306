@@ -8,7 +8,6 @@ import com.kalvin.J12306.api.Login;
 import com.kalvin.J12306.api.SubmitOrderRequest;
 import com.kalvin.J12306.api.Ticket;
 import com.kalvin.J12306.cache.TicketCache;
-import com.kalvin.J12306.config.ConfigConst;
 import com.kalvin.J12306.config.Constants;
 import com.kalvin.J12306.dto.TicketInfoDTO;
 import com.kalvin.J12306.dto.UserInfoDTO;
@@ -16,6 +15,7 @@ import com.kalvin.J12306.exception.J12306Exception;
 import com.kalvin.J12306.http.Session;
 import com.kalvin.J12306.utils.J12306Util;
 import com.kalvin.J12306.utils.StationUtil;
+import com.kalvin.J12306.utils.YmlUtil;
 
 import java.util.List;
 
@@ -141,6 +141,7 @@ public class Go12306 {
                             if (this.seats.contains(Constants.L2_SEAT_CODE)) {
                                 // 提交订单
                                 if (hasL2Seat) {
+                                    log.info("提交订单：车次：{}，二等座，发车日期：{}，座席类型：{}", trainNum, trainDate, Constants.L2_SEAT_CODE);
                                     new SubmitOrderRequest(
                                             this.session,
                                             secretStr,
@@ -152,11 +153,11 @@ public class Go12306 {
                                             trainNum,
                                             trainLocation
                                     ).send();
-                                    log.info("提交订单：车次：{}，二等座，发车日期：{}，座席类型：{}", trainNum, trainDate, Constants.L2_SEAT_CODE);
                                 }
                             }
                             if (this.seats.contains(Constants.L1_SEAT_CODE)) {
                                 if (hasL1Seat) {
+                                    log.info("提交订单：车次：{}，二等座，发车日期：{}，座席类型：{}", trainNum, trainDate, Constants.L1_SEAT_CODE);
                                     new SubmitOrderRequest(
                                             this.session,
                                             secretStr,
@@ -168,11 +169,11 @@ public class Go12306 {
                                             trainNum,
                                             trainLocation
                                     ).send();
-                                    log.info("提交订单：车次：{}，二等座，发车日期：{}，座席类型：{}", trainNum, trainDate, Constants.L1_SEAT_CODE);
                                 }
                             }
                             if (this.seats.contains(Constants.NO_SEAT_CODE)) {
                                 if (hasNoSeat) {
+                                    log.info("提交订单：车次：{}，二等座，发车日期：{}，座席类型：{}", trainNum, trainDate, Constants.NO_SEAT_CODE);
                                     new SubmitOrderRequest(
                                             this.session,
                                             secretStr,
@@ -184,7 +185,6 @@ public class Go12306 {
                                             trainNum,
                                             trainLocation
                                     ).send();
-                                    log.info("提交订单：车次：{}，二等座，发车日期：{}，座席类型：{}", trainNum, trainDate, Constants.NO_SEAT_CODE);
                                 }
                             }
                         } catch (J12306Exception e) {
@@ -200,7 +200,8 @@ public class Go12306 {
                 log.info("-------线程【{}】无法获取车票信息，状态码：{}", Thread.currentThread().getName(), httpResponse.getStatus());
             }
             // 睡眠2秒
-            J12306Util.sleep(ConfigConst.QUERY_TICKET_SPEED_SECOND);
+            int querySpeed = (Integer) YmlUtil.get("j12306.ticket.queryspeed");
+            J12306Util.sleep(querySpeed);
         }
 
     }

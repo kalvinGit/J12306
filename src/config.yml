@@ -1,0 +1,21 @@
+# 配置
+
+# 12306账号密码配置（暂时没用到）
+j12306:
+  user: 182xxxx
+  password: 123456
+
+  ticket:
+    queryspeed: 2 # 刷票速度。默认2秒
+
+  # 通知配置
+  notice:
+    # 电子邮件配置
+    email:
+      sender:
+        from: hutool@yeah.net   # 发件人（必须正确，否则发送失败）
+        host: smtp.yeah.net    # 邮件服务器的SMTP地址，可选，默认为smtp.<发件人邮箱后缀>
+        port: 25    # 邮件服务器的SMTP端口，可选，默认25
+        user: hutool    # 用户名
+        pass: qlw2e3    # 密码（注意，某些邮箱需要为SMTP服务单独设置密码，详情查看相关帮助）
+      receiver: 1481397688@qq.com   # 接收人邮箱

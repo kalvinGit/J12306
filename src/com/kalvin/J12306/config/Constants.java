@@ -1,5 +1,7 @@
 package com.kalvin.J12306.config;
 
+import cn.hutool.core.util.ClassUtil;
+
 /**
  * Create by Kalvin on 2019/9/18.
  */
@@ -12,6 +14,8 @@ public class Constants {
     public final static String IMAGE_AI_URL = "http://shell.teachx.cn:12306/predict";
 
     public final static int REQ_SUCCESS_STATUS = 200;
+
+    public final static String CAPTCHA_IMG_PRE_PATH = ClassUtil.getClassPath() + "captcha/";    // 验证码图片生成保存路径
 
     public final static String STATION_CACHE_KEY = "STATION";   // 站点信息
     public final static String BLACK_ROOM_KEY = "BLACK_ROOM";   // 小黑屋
