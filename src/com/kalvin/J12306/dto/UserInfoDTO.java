@@ -12,6 +12,7 @@ public class UserInfoDTO {
     private String idTypeName;  // 证件类型名称
     private String idNo;    // 证件号码
     private String email;   // 用户绑定的邮箱账号
+    private String userEncStr;  // 用户密钥串
 
     public String getName() {
         return name;
@@ -61,6 +62,14 @@ public class UserInfoDTO {
         this.email = email;
     }
 
+    public String getUserEncStr() {
+        return userEncStr;
+    }
+
+    public void setUserEncStr(String userEncStr) {
+        this.userEncStr = userEncStr;
+    }
+
     @Override
     public String toString() {
         return "UserInfoDTO{" +
@@ -70,6 +79,7 @@ public class UserInfoDTO {
                 ", idTypeName='" + idTypeName + '\'' +
                 ", idNo='" + idNo + '\'' +
                 ", email='" + email + '\'' +
+                ", userEncStr='" + userEncStr + '\'' +
                 '}';
     }
 }

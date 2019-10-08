@@ -6,6 +6,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.kalvin.J12306.cache.TicketCache;
+import com.kalvin.J12306.config.Constants;
 import com.kalvin.J12306.config.UrlsEnum;
 import com.kalvin.J12306.dto.UserInfoDTO;
 import com.kalvin.J12306.http.Session;
@@ -38,7 +39,7 @@ public class PassengerDTOS {
         String passengerTicketStr = "{seatType},0,1,{name},1,{passengerIdCard},,N,{allEncStr}";
         // 从缓存中获取用户信息
         TicketCache ticketCache = TicketCache.getInstance();
-        UserInfoDTO userInfo = (UserInfoDTO) ticketCache.get("userInfo");
+        UserInfoDTO userInfo = (UserInfoDTO) ticketCache.get(Constants.USER_INFO_KEY);
         String idNo = userInfo.getIdNo();
         String name = userInfo.getName();
 
@@ -53,6 +54,9 @@ public class PassengerDTOS {
                 ((JSONObject) object).get("passenger_id_no").equals(idNo))
                 .collect(Collectors.toList());
         String allEncStr = ((JSONObject) list.get(0)).get("allEncStr").toString();
+        userInfo.setUserEncStr(allEncStr);
+
+        ticketCache.put(Constants.USER_INFO_KEY, userInfo);
 
         return passengerTicketStr
                 .replace("{seatType}", this.seatType)
@@ -69,7 +73,7 @@ public class PassengerDTOS {
         String oldPassengerStr = "{name},1,{passengerIdCard},1_";
         // 从缓存中获取用户信息
         TicketCache ticketCache = TicketCache.getInstance();
-        UserInfoDTO userInfo = (UserInfoDTO) ticketCache.get("userInfo");
+        UserInfoDTO userInfo = (UserInfoDTO) ticketCache.get(Constants.USER_INFO_KEY);
         String idNo = userInfo.getIdNo();
         String name = userInfo.getName();
         return oldPassengerStr.replace("{name}", name).replace("{passengerIdCard}", idNo);

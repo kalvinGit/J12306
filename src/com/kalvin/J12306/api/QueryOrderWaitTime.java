@@ -12,6 +12,7 @@ import com.kalvin.J12306.config.UrlConfig;
 import com.kalvin.J12306.config.UrlsEnum;
 import com.kalvin.J12306.exception.J12306Exception;
 import com.kalvin.J12306.http.Session;
+import com.kalvin.J12306.utils.EmailUtil;
 import com.kalvin.J12306.utils.J12306Util;
 
 /**
@@ -37,8 +38,18 @@ public class QueryOrderWaitTime {
 
         while (true) {
             if (tryTimes >= Constants.MAX_TRY_TIMES) {
-                // todo 自动取消订单未实现
-                log.info("排队失败，取消订单");
+                // 自动取消订单
+                MyOrder myOrder = new MyOrder(this.session);
+                myOrder.init();
+                MyOrder.State check = myOrder.check();
+                switch (check.getCode()) {
+                    case MyOrder.State.NO_PAY_CODE:
+                        success = true;
+                        break;
+                    case MyOrder.State.QUEUE_CODE:
+                        log.info("排队失败，取消订单");
+                        myOrder.cancelNoComplete(check.getSequenceNo());
+                }
                 break;
             }
             try {
@@ -84,11 +95,8 @@ public class QueryOrderWaitTime {
             // 订票成功，使用邮件通知抢票人
             log.info("恭喜您订票成功，订单号为：{}, 请立即打开浏览器登录12306，访问‘未完成订单’，在30分钟内完成支付!", orderId);
             log.info("以邮件方式通知抢票人");
-            J12306Util.sendSuccessEmail(orderId);
+            EmailUtil.send("12306抢票成功", "恭喜您订票成功，订单号为：" + orderId + ", 请立即打开浏览器登录12306，访问‘未完成订单’，在30分钟内完成支付!");
             throw new J12306Exception(Constants.THREAD_STOP);
-        } else {
-            // todo 有些情况排队失败也会订票成功，所有此处查询一下用户订单信息
-            log.info("有些情况排队失败也会订票成功，所以建议您登录12306检查下未完成的订单。。。");
         }
 
     }

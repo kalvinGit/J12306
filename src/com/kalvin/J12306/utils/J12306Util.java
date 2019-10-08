@@ -88,6 +88,13 @@ public class J12306Util {
                 ticketInfoDTO.setL2HardBerth(split[28]);
                 ticketInfoDTO.setHardSeat(split[29]);
                 ticketInfoDTO.setNoSeat(split[26]);
+                ticketInfoDTO.setCanAlternate(split[37].equals("1"));
+                if (split.length == 38) {
+                    ticketInfoDTO.setCanNotAlternateSeatType("");
+                }
+                if (split.length == 39) {
+                    ticketInfoDTO.setCanNotAlternateSeatType(split[38]);
+                }
 
                 ticketInfoDTO.setFormStationName(map.get(split[6]).toString());
                 ticketInfoDTO.setToStationName(map.get(split[7]).toString());
@@ -95,7 +102,6 @@ public class J12306Util {
                 ticketInfoDTOS.add(ticketInfoDTO);
             }
         }
-
         return ticketInfoDTOS;
     }
 
@@ -113,15 +119,6 @@ public class J12306Util {
         final DateTime date = DateUtil.parse(dateStr);
         final SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd yyyy '00:00:00' 'GMT'Z '(中国标准时间)'", Locale.ENGLISH);
         return sdf.format(date);
-    }
-
-    public static void sendSuccessEmail(String orderId) {
-        // 订票成功，使用邮件通知抢票人
-        try {
-            EmailUtil.send("12306抢票成功", "恭喜您订票成功，订单号为：" + orderId + ", 请立即打开浏览器登录12306，访问‘未完成订单’，在30分钟内完成支付!");
-        } catch (Exception e) {
-            log.info("无法通过邮件通知您，请检查config.yml配置文件，确保邮件相关配置正确！error：" + e.getMessage());
-        }
     }
 
 }

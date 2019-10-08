@@ -26,6 +26,8 @@ public class TicketInfoDTO {
     private String l2HardBerth; // 硬卧二等卧
     private String hardSeat;    // 硬座
     private String noSeat;      // 无座
+    private boolean canAlternate;   // 是否可候补。1代表能候补
+    private String canNotAlternateSeatType; // 不能候补的座席
 
     public String getSecretStr() {
         return secretStr;
@@ -179,9 +181,25 @@ public class TicketInfoDTO {
         this.noSeat = noSeat;
     }
 
+    public boolean isCanAlternate() {
+        return canAlternate;
+    }
+
+    public void setCanAlternate(boolean canAlternate) {
+        this.canAlternate = canAlternate;
+    }
+
+    public String getCanNotAlternateSeatType() {
+        return canNotAlternateSeatType;
+    }
+
+    public void setCanNotAlternateSeatType(String canNotAlternateSeatType) {
+        this.canNotAlternateSeatType = canNotAlternateSeatType;
+    }
+
     @Override
     public String toString() {
-        return "TrainSchedule{" +
+        return "TicketInfoDTO{" +
                 "secretStr='" + secretStr + '\'' +
                 ", trainNo='" + trainNo + '\'' +
                 ", trainNum='" + trainNum + '\'' +
@@ -201,7 +219,8 @@ public class TicketInfoDTO {
                 ", l2HardBerth='" + l2HardBerth + '\'' +
                 ", hardSeat='" + hardSeat + '\'' +
                 ", noSeat='" + noSeat + '\'' +
+                ", canAlternate=" + canAlternate +
+                ", canNotAlternateSeatType='" + canNotAlternateSeatType + '\'' +
                 '}';
     }
-
 }

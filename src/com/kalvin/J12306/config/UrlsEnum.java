@@ -7,7 +7,7 @@ package com.kalvin.J12306.config;
 public enum UrlsEnum {
 
     LOG_DEVICE(new UrlConfig(   // 设备信息
-            "https://kyfw.12306.cn/otn/HttpZF/logdevice?algID=SB8fX7Pxdo&hashCode=hGI8VBr0Z-RqCa46_l2YH6QDnUMDILT8N2bLl_aWs6Q&FMQw=0&q4f3=zh-CN&VPIf=1&custID=133&VEek=unknown&dzuS=0&yD16=0&EOQP=8f58b1186770646318a429cb33977d8c&jp76=52d67b2a5aa5e031084733d5006cc664&hAqN=Win32&platform=WEB&ks0Q=d22ca0b81584fbea62237b14bd04c866&TeRS=1040x1920&tOHY=24xx1080x1920&Fvje=i1l1o1s1&q5aJ=-8&wNLf=99115dfb07133750ba677d055874de87&0aew={0}&E3gR=9564647ce82bb8fb9e3489ea64d9ee3d&timestamp={1}",   // url地址
+            "https://kyfw.12306.cn/otn/HttpZF/logdevice?algID=WAa2rRuEOC&hashCode=f7CYuO-1NULoIcNkfelibUeR5CpjIpv-j2WhckLPvf8&FMQw=0&q4f3=zh-CN&VPIf=1&custID=133&VEek=unknown&dzuS=0&yD16=0&EOQP=8f58b1186770646318a429cb33977d8c&jp76=52d67b2a5aa5e031084733d5006cc664&hAqN=Win32&platform=WEB&ks0Q=d22ca0b81584fbea62237b14bd04c866&TeRS=1040x1920&tOHY=24xx1080x1920&Fvje=i1l1o1s1&q5aJ=-8&wNLf=99115dfb07133750ba677d055874de87&0aew={0}&E3gR=9564647ce82bb8fb9e3489ea64d9ee3d&timestamp={1}",   // url地址
             "get",  // 请求方法
             "https://kyfw.12306.cn/otn/login/init" // referer
     )),
@@ -130,6 +130,66 @@ public enum UrlsEnum {
             "https://kyfw.12306.cn/otn/confirmPassenger/resultOrderForDcQueue",
             "post",
             ""
+    )),
+    INIT_NO_COMPLETE(new UrlConfig(    // 初始化用户未完成的订单列表
+            "https://kyfw.12306.cn/otn/queryOrder/initNoComplete",
+            "get",
+            "https://kyfw.12306.cn/otn/passport?redirect=/otn/queryOrder/initNoComplete"
+    )),
+    INIT_MY12306_API(new UrlConfig(    // 初始化用户基础信息API
+            "https://kyfw.12306.cn/otn/index/initMy12306Api",
+            "post",
+            "https://kyfw.12306.cn/otn/view/index.html"
+    )),
+    QUERY_MY_ORDER_NO_COMPLETE(new UrlConfig(    // 查询未完成的订单
+            "https://kyfw.12306.cn/otn/queryOrder/queryMyOrderNoComplete",
+            "post",
+            "https://kyfw.12306.cn/otn/queryOrder/initNoComplete"
+    )),
+    CANCEL_NO_COMPLETE_MY_ORDER(new UrlConfig(    // 查询未完成的订单
+            "https://kyfw.12306.cn/otn/queryOrder/cancelNoCompleteMyOrder",
+            "post",
+            "https://kyfw.12306.cn/otn/queryOrder/initNoComplete"
+    )),
+    CHECK_FACE(new UrlConfig(    // 人脸验证
+            "https://kyfw.12306.cn/otn/afterNate/chechFace",
+            "post",
+            "https://kyfw.12306.cn/otn/leftTicket/init"
+    )),
+    GET_SUCCESS_RATE(new UrlConfig(    // 成功添加候补
+            "https://kyfw.12306.cn/otn/afterNate/getSuccessRate",
+            "post",
+            "https://kyfw.12306.cn/otn/leftTicket/init"
+    )),
+    SUBMIT_ORDER_REQUEST_AN(new UrlConfig(    // 提交候补订单
+            "https://kyfw.12306.cn/otn/afterNate/submitOrderRequest",
+            "post",
+            "https://kyfw.12306.cn/otn/leftTicket/init"
+    )),
+    LINE_UP_TO_PAY(new UrlConfig(    // 候补页面
+            "https://kyfw.12306.cn/otn/view/lineUp_toPay.html",
+            "get",
+            "https://kyfw.12306.cn/otn/leftTicket/init"
+    )),
+    PASSENGER_INIT_API(new UrlConfig(    // 乘客信息接口
+            "https://kyfw.12306.cn/otn/afterNate/passengerInitApi",
+            "post",
+            "https://kyfw.12306.cn/otn/view/lineUp_toPay.html"
+    )),
+    GET_QUEUE_NUM(new UrlConfig(    // 获取候补排队人数
+            "https://kyfw.12306.cn/otn/afterNate/getQueueNum",
+            "post",
+            "https://kyfw.12306.cn/otn/view/lineUp_toPay.html"
+    )),
+    CONFIRM_HB(new UrlConfig(    // 提交候补订单信息
+            "https://kyfw.12306.cn/otn/afterNate/confirmHB",
+            "post",
+            "https://kyfw.12306.cn/otn/view/lineUp_toPay.html"
+    )),
+    QUERY_QUEUE(new UrlConfig(    // 候补排队
+            "https://kyfw.12306.cn/otn/queryOrder/cancelNoCompleteMyOrder",
+            "post",
+            "https://kyfw.12306.cn/otn/view/lineUp_toPay.html"
     ));
 
     private UrlConfig urlConfig;

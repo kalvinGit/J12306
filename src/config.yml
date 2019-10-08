@@ -7,6 +7,7 @@ j12306:
 
   ticket:
     queryspeed: 2 # 刷票速度。默认2秒
+    alternate: true # 开启自动候补
 
   # 通知配置
   notice:

@@ -120,7 +120,7 @@ public class Session {
             headers.forEach((k, v) -> this.httpRequest.header(k, v));
         }
 
-        public String getHeadder(String name) {
+        public String getHeader(String name) {
             return this.httpRequest.header(name);
         }
     }
