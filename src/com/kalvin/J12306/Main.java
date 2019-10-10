@@ -11,7 +11,7 @@ public class Main {
 
     public static void selectTicket1() {
         Go12306.newInstance()
-                .initUser("18218798420", "qr_kh_6926641746")    // 用户名/密码
+                .initUser("182xxxx", "123456")    // 用户名/密码
                 .initBookTicketInfo("2019-10-13", // 乘车日期
                         "广州",   // 始发站
                         "怀集",   // 到达站
@@ -22,7 +22,7 @@ public class Main {
 
     public static void selectTicket2() {
         Go12306.newInstance()
-                .initUser("18218798420", "qr_kh_6926641746")    // 用户名/密码
+                .initUser("182xxxx", "123456")    // 用户名/密码
                 .initBookTicketInfo("2019-10-14", // 乘车日期
                         "广州",   // 始发站
                         "怀集",   // 到达站
