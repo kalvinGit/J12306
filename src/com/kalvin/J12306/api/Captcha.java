@@ -1,6 +1,7 @@
 package com.kalvin.J12306.api;
 
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -9,6 +10,7 @@ import com.kalvin.J12306.AI.ImageAI;
 import com.kalvin.J12306.config.Constants;
 import com.kalvin.J12306.config.UrlConfig;
 import com.kalvin.J12306.config.UrlsEnum;
+import com.kalvin.J12306.exception.J12306Exception;
 import com.kalvin.J12306.http.Session;
 import com.kalvin.J12306.utils.J12306Util;
 
@@ -68,6 +70,9 @@ public class Captcha {
         hashMap.put("rand", "sjrand");
         HttpResponse httpResponse = this.session.httpClient.send(UrlsEnum.CHECK_CAPTCHA, hashMap);
         String body = httpResponse.body();
+        if (StrUtil.isBlank(body)) {
+            throw new J12306Exception(Constants.UPDATE_LOG_DEVICE_ERROR_MSG);
+        }
 //        System.out.println("checkLoginCaptchaImg body = " + body);
         JSONObject jsonObject = JSONUtil.parseObj(body);
         String resultCode = jsonObject.get("result_code").toString();

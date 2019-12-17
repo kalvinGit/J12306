@@ -9,6 +9,8 @@ public class Constants {
 
     public final static String HOST = "kyfw.12306.cn";
 
+    public final static String ORIGIN = "https://kyfw.12306.cn";
+
     public final static String ACCEPT = "text/javascript, application/javascript, application/ecmascript,application/json, application/x-ecmascript,image/webp,image/apng,image/*,*/*; q=0.01";
 
     public final static String IMAGE_AI_URL = "http://shell.teachx.cn:12306/predict";
@@ -32,5 +34,7 @@ public class Constants {
     public final static int MAX_TRY_TIMES = 20;
 
     public final static String THREAD_STOP = "STOP";
+
+    public final static String UPDATE_LOG_DEVICE_ERROR_MSG = "RAIL_EXPIRATION值已失效，需要更新获取设备信息的LOG_DEVICE接口参数，请在UrlsEnum.java中更新";
 
 }

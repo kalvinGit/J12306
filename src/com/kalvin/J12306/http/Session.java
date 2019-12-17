@@ -87,6 +87,7 @@ public class Session {
             if (this.httpRequest == null) {
                 this.httpRequest = HttpUtil.createGet(urlConfig.getUrl());
                 this.httpRequest.header("Host", Constants.HOST);
+                this.httpRequest.header("Origin", Constants.ORIGIN);
                 this.httpRequest.header("Connection", "keep-alive");
                 this.httpRequest.header("Accept", Constants.ACCEPT);
             } else {

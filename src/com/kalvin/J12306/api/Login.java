@@ -7,6 +7,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
+import com.kalvin.J12306.config.Constants;
 import com.kalvin.J12306.config.UrlConfig;
 import com.kalvin.J12306.config.UrlsEnum;
 import com.kalvin.J12306.dto.UserInfoDTO;
@@ -54,9 +55,8 @@ public class Login {
             HttpResponse httpResponse = this.session.httpClient.send(UrlsEnum.LOGIN, formData);
             String body = httpResponse.body();
 //            log.info("login body={}", body);
-
             if (StrUtil.isBlank(body)) {
-                throw new J12306Exception("登录失败，可能需要设置RAIL_EXPIRATION cookie值！");
+                throw new J12306Exception(Constants.UPDATE_LOG_DEVICE_ERROR_MSG);
             }
 
             JSONObject jsonObject = JSONUtil.parseObj(body);
@@ -65,6 +65,7 @@ public class Login {
                 log.info("登录成功");
                 this.userLogin();
                 this.passport();
+                new GetJS(this.session).send();
                 boolean uamtk = this.postUamTK((String) jsonObject.get("uamtk"));
                 if (uamtk) {
                     return this.getUserInfo();
@@ -80,7 +81,7 @@ public class Login {
     }
 
     private void initLogDevice() {
-        String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36";
+        String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36";
         Session ldSession = new Session();
         UrlConfig urlConfig = UrlsEnum.LOG_DEVICE.getUrlConfig();
         urlConfig.setUrl(urlConfig.getUrl()
@@ -100,6 +101,7 @@ public class Login {
 //        log.info("railDeviceId={}", railDeviceId);
         this.session.setCookie("RAIL_EXPIRATION=" + railExpiration);
         this.session.setCookie("RAIL_DEVICEID=" + railDeviceId);
+        this.session.httpClient.setHeader(new HashMap<String, String>() {{put("User-Agent", userAgent);}});
     }
 
     private void userLogin() {
@@ -118,17 +120,18 @@ public class Login {
      * @param uamTK uamTK令牌
      */
     private boolean postUamTK(String uamTK) {
-        if (StrUtil.isNotBlank(uamTK)) {
+        /*if (StrUtil.isNotBlank(uamTK)) {
             HashMap<String, String> headers = new HashMap<String, String>() {{
-                put("uamtk", uamTK);
+//                put("uamtk", uamTK);
             }};
             this.session.httpClient.setHeader(headers);
-        }
+        }*/
 
         HashMap<String, Object> formData = new HashMap<String, Object>() {{
             put("appid", "otn");
         }};
         HttpResponse httpResponse = this.session.httpClient.send(UrlsEnum.UAM_TK, formData);
+//        log.info("postUamTK http status = {}", httpResponse.getStatus());
         String body = httpResponse.body();
 
         JSONObject jsonObject = JSONUtil.parseObj(body);
