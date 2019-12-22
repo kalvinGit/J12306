@@ -109,17 +109,17 @@ public class ConfirmSingleForQueue {
                     ).send();
                 } else {
                     ticketCache.put(this.trainNum, this.trainNum, Constants.BLACK_ROOM_CACHE_EXP_TIME * 60);
-                    log.info("正式下单失败，错误信息：{}。此列车{}加入小黑屋闭关3分钟", parse.getByPath("data.errMsg"), this.trainNum);
+                    log.error("正式下单失败，错误信息：{}。此列车{}加入小黑屋闭关3分钟", parse.getByPath("data.errMsg"), this.trainNum);
                 }
             } else {
                 ticketCache.put(this.trainNum, this.trainNum, Constants.BLACK_ROOM_CACHE_EXP_TIME * 60);
-                log.info("正式下单失败，错误信息：{}。此列车{}加入小黑屋闭关3分钟", parse.getByPath("messages"), this.trainNum);
+                log.error("正式下单失败，错误信息：{}。此列车{}加入小黑屋闭关3分钟", parse.getByPath("messages"), this.trainNum);
             }
         } catch (Exception e) {
             if (e instanceof J12306Exception) {
                 throw new J12306Exception(e.getMessage());
             } else {
-                log.info("正式下单异常：{}", e.getMessage());
+                log.error("正式下单异常：{}", e.getMessage());
             }
         }
 

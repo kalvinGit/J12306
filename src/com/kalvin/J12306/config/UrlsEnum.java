@@ -7,7 +7,7 @@ package com.kalvin.J12306.config;
 public enum UrlsEnum {
 
     LOG_DEVICE(new UrlConfig(   // 设备信息
-            "https://kyfw.12306.cn/otn/HttpZF/logdevice?algID=0esUtQft4U&hashCode=giAULxtXDoHElQE9H-7NBQTvIkDOtSRVXiI8cR-WiCM&FMQw=0&q4f3=zh-CN&VPIf=1&custID=133&VEek=unknown&dzuS=0&yD16=0&EOQP=8f58b1186770646318a429cb33977d8c&jp76=52d67b2a5aa5e031084733d5006cc664&hAqN=Win32&platform=WEB&ks0Q=d22ca0b81584fbea62237b14bd04c866&TeRS=1040x1920&tOHY=24xx1080x1920&Fvje=i1l1o1s1&q5aJ=-8&wNLf=99115dfb07133750ba677d055874de87&0aew={0}&E3gR=1bad9f8fb462a6ebf56a1abf0cfed2bc&timestamp={1}",   // url地址
+            "https://kyfw.12306.cn/otn/HttpZF/logdevice",   // url地址
             "get",  // 请求方法
             "https://kyfw.12306.cn/otn/login/init" // referer
     )),
@@ -66,8 +66,13 @@ public enum UrlsEnum {
             "get",
             "https://www.12306.cn/index/index.html"
     )),
-    QUERY_TICKET(new UrlConfig( // 查票接口
+    QUERY_A_TICKET(new UrlConfig( // 查票接口A
             "https://kyfw.12306.cn/otn/leftTicket/queryA?leftTicketDTO.train_date={0}&leftTicketDTO.from_station={1}&leftTicketDTO.to_station={2}&purpose_codes=ADULT",
+            "post",
+            "https://kyfw.12306.cn/otn/leftTicket/init"
+    )),
+    QUERY_Z_TICKET(new UrlConfig( // 查票接口Z
+            "https://kyfw.12306.cn/otn/leftTicket/queryZ?leftTicketDTO.train_date={0}&leftTicketDTO.from_station={1}&leftTicketDTO.to_station={2}&purpose_codes=ADULT",
             "post",
             "https://kyfw.12306.cn/otn/leftTicket/init"
     )),

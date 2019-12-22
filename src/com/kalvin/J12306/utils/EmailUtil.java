@@ -32,7 +32,7 @@ public class EmailUtil {
         try {
             MailUtil.send(account, (String) YmlUtil.get("j12306.notice.email.receiver"), subject, content, false);
         } catch (Exception e) {
-            log.info("无法通过邮件通知您，请检查config.yml配置文件，确保邮件相关配置正确！error：" + e.getMessage());
+            log.error("无法通过邮件通知您，请检查config.yml配置文件，确保邮件相关配置正确！error：" + e.getMessage());
         }
     }
 }

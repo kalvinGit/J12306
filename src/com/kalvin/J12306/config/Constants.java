@@ -23,6 +23,7 @@ public class Constants {
     public final static String STATION_CACHE_KEY = "STATION";   // 站点信息
     public final static String BLACK_ROOM_KEY = "BLACK_ROOM";   // 小黑屋
     public final static String ALTERNATE_BLACK_ROOM_KEY = "ALTERNATE_BLACK_ROOM";   // 候补小黑屋
+    public final static String THREAD_LOCK_TRAIN = "THREAD_LOCK_TRAIN";
     public final static int BLACK_ROOM_CACHE_EXP_TIME = 3;  // 默认3分钟
 
 
@@ -33,8 +34,10 @@ public class Constants {
 
     public final static int MAX_TRY_TIMES = 20;
 
+    public final static int MAX_302 = 10;   //  最大302请求数。如果官方更换了接口，程序会在10次访问302状态的接口自动切换到另一个接口去。如：queryZ -> queryA
+
     public final static String THREAD_STOP = "STOP";
 
-    public final static String UPDATE_LOG_DEVICE_ERROR_MSG = "RAIL_EXPIRATION值已失效，需要更新获取设备信息的LOG_DEVICE接口参数，请在UrlsEnum.java中更新";
+    public final static String UPDATE_LOG_DEVICE_ERROR_MSG = "RAIL_EXPIRATION值已失效，需要更新获取设备信息的LOG_DEVICE接口参数，请到Login.java类的fillLogDeviceUrlParams方法中更新";
 
 }

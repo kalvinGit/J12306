@@ -16,6 +16,7 @@ import com.kalvin.J12306.http.Session;
 
 import java.net.HttpCookie;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -81,12 +82,13 @@ public class Login {
     }
 
     private void initLogDevice() {
-        String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36";
+        String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36";
         Session ldSession = new Session();
         UrlConfig urlConfig = UrlsEnum.LOG_DEVICE.getUrlConfig();
-        urlConfig.setUrl(urlConfig.getUrl()
+        /*urlConfig.setUrl(urlConfig.getUrl()
                 .replace("{0}", userAgent)
-                .replace("{1}", String.valueOf(System.currentTimeMillis())));
+                .replace("{1}", String.valueOf(System.currentTimeMillis())));*/
+        urlConfig.setUrl(this.fillLogDeviceUrlParams(urlConfig.getUrl()));
         UrlsEnum.LOG_DEVICE.setUrlConfig(urlConfig);
         HttpResponse httpResponse = ldSession.httpClient.send(UrlsEnum.LOG_DEVICE);
         String body = httpResponse.body();
@@ -101,7 +103,60 @@ public class Login {
 //        log.info("railDeviceId={}", railDeviceId);
         this.session.setCookie("RAIL_EXPIRATION=" + railExpiration);
         this.session.setCookie("RAIL_DEVICEID=" + railDeviceId);
-        this.session.httpClient.setHeader(new HashMap<String, String>() {{put("User-Agent", userAgent);}});
+//        this.session.httpClient.setHeader(new HashMap<String, String>() {{put("User-Agent", userAgent);}});
+    }
+
+    private String fillLogDeviceUrlParams(String url) {
+        final StringBuilder sb = new StringBuilder();
+        /**
+         * 如果RAIL_DEVICEID失效了，以下参数需要更新
+         * 更新步骤：
+         * 1.浏览器访问：https://kyfw.12306.cn/otn/login/init
+         * 2.清除浏览器缓存的有关12306.cn和kyfw.12306.cn的Cookie（谷歌浏览器点击浏览器地址栏的小锁）
+         * 3.按f12进入调试模式并点击Network选项
+         * 4.按f5重新刷新
+         * 5.在Network选项下找到logdevice请求，点击它，在Headers选项下拉到最下面就可以找到如下几个参数，复制替换它即可
+         */
+        final String algID = "mY8X82D4zg";
+        final String hashCode = "OAfXG7as4gjaQMpz49SFm-f5NXRJ4iZkL_qvduWcz88";
+        final String EOQP = "4902a61a235fbb59700072139347967d";
+        final String jp76 = "52d67b2a5aa5e031084733d5006cc664";
+        final String q5aJ = "-8";
+        final String Oaew = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36";
+        final String E3gR = "c51a977fae84c6c216d2d364e42cdef0";
+
+        new LinkedHashMap<String, Object>() {{
+            put("algID", algID);
+            put("hashCode", hashCode);
+            put("FMQw", "0");
+            put("q4f3", "zh-CN");
+            put("VPIf", "1");
+            put("custID", "133");
+            put("VEek", "unknown");
+            put("dzuS", "0");
+            put("yD16", "0");
+            put("EOQP", EOQP);
+            put("jp76", jp76);
+            put("hAqN", "Win32");
+            put("platform", "WEB");
+            put("ks0Q", "d22ca0b81584fbea62237b14bd04c866");
+            put("TeRS", "1040x1920");
+            put("tOHY", "24xx1080x1920");
+            put("Fvje", "i1l1o1s1");
+            put("q5aJ", q5aJ);
+            put("wNLf", "99115dfb07133750ba677d055874de87");
+            put("0aew", Oaew);
+            put("E3gR", E3gR);
+            put("timestamp", String.valueOf(System.currentTimeMillis()));
+        }}.forEach((k, v) -> {
+            if (sb.length() == 0) {
+                sb.append("?");
+            } else {
+                sb.append("&");
+            }
+            sb.append(k).append("=").append(v);
+        });
+        return url + sb.toString();
     }
 
     private void userLogin() {
@@ -131,8 +186,9 @@ public class Login {
             put("appid", "otn");
         }};
         HttpResponse httpResponse = this.session.httpClient.send(UrlsEnum.UAM_TK, formData);
-//        log.info("postUamTK http status = {}", httpResponse.getStatus());
+        log.info("postUamTK http status = {}", httpResponse.getStatus());
         String body = httpResponse.body();
+//        log.info("postUamTK body = {}", body);
 
         JSONObject jsonObject = JSONUtil.parseObj(body);
         Integer resultCode = (Integer) jsonObject.get("result_code");

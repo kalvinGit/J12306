@@ -88,9 +88,17 @@ public class Go12306 {
         // 开始登录
         Login login = new Login(this.session, this.username, this.password);
         UserInfoDTO userInfo = login.send();
-        if (userInfo == null) {
-            log.info("重次登录一次");
-            userInfo = login.send();
+        int tryLoginCount = 0;
+        while (true) {
+            if (userInfo == null) {
+                if (tryLoginCount >= 5) {
+                    throw new J12306Exception("无法登录，程序已终止，请手动重试登录");
+                }
+                log.error("登录失败，正在第{}次尝试登录", tryLoginCount++);
+                userInfo = login.send();
+            } else {
+                break;
+            }
         }
         // 用户信息保存到缓存中
         this.ticketCache.put(Constants.USER_INFO_KEY, userInfo);
@@ -98,15 +106,26 @@ public class Go12306 {
         // 开始查询余票
         Ticket ticket = new Ticket(this.session, this.trainDate, this.fromStation, this.toStation);
 
-//        String[] split = this.trainDates.split(",");
-//        int len = split.length;
-//        ExecutorService executorService = Executors.newFixedThreadPool(len);
+        int querySpeed = (Integer) YmlUtil.get("j12306.ticket.queryspeed");
+
+        // 计算刷票粒度
+//        int intervalTime = querySpeed / threadPoolSize;
+//        ExecutorService executorService = Executors.newFixedThreadPool(threadPoolSize);
+
+        int queryA302Count = 0, queryZ302Count = 0;
+        String usingQuery = (String) YmlUtil.get("j12306.ticket.queryp");
         stopLop: while (true) {
             HttpResponse httpResponse;
             try {
-                httpResponse = ticket.query();
+                if ("A".equals(usingQuery)) {
+                    httpResponse = ticket.queryA();
+                } else if ("Z".equals(usingQuery)) {
+                    httpResponse = ticket.queryZ();
+                } else {
+                    throw new J12306Exception("查票接口异常，请确认config.yml[j12306.ticket.queryp]配置正确");
+                }
             } catch (HttpException e) {
-                log.info("请求超时，或无法访问，错误信息：{}", e.getMessage());
+                log.error("请求超时，或无法访问，错误信息：{}", e.getMessage());
                 continue;
             }
 
@@ -118,7 +137,7 @@ public class Go12306 {
                 try {
                     ticketInfoDTOS = J12306Util.parseTicketInfo(body);
                 } catch (JSONException e) {
-                    log.info("查询车票发生未知异常：{}", e.getMessage());
+                    log.error("查询车票发生未知异常：{}", e.getMessage());
                     continue;
                 }
                 for (TicketInfoDTO ticketInfoDTO : ticketInfoDTOS) {
@@ -177,7 +196,7 @@ public class Go12306 {
                                             alternateOrder.getSuccessRate();
                                         }
                                     } catch (Exception e) {
-                                        log.info("候补异常：{}", e.getMessage());
+                                        log.error("候补异常：{}", e.getMessage());
                                     }
                                 }
                             }
@@ -249,11 +268,23 @@ public class Go12306 {
                 this.queryCount++;
                 log.info("-------线程【{}】已为账号{}刷票{}次，启程日期：{}--------", Thread.currentThread().getName(), this.username, this.queryCount, trainDate);
             } else {
-                log.info("-------线程【{}】无法获取车票信息，状态码：{}", Thread.currentThread().getName(), httpResponse.getStatus());
+                log.error("-------线程【{}】无法获取车票信息，状态码：{}；程序会在{}次访问302后切换到另一个查询接口", Thread.currentThread().getName(), httpResponse.getStatus(), Constants.MAX_302);
+                if (httpResponse.getStatus() == 302) {
+                    if ("A".equals(usingQuery)) {
+                        queryA302Count++;
+                    }
+                    if ("Z".equals(usingQuery)) {
+                        queryZ302Count++;
+                    }
+                    if (queryA302Count >= Constants.MAX_302) {
+                        usingQuery = "Z";
+                    }
+                    if (queryZ302Count >= Constants.MAX_302) {
+                        usingQuery = "A";
+                    }
+                }
             }
-            // 睡眠2秒
-            int querySpeed = (Integer) YmlUtil.get("j12306.ticket.queryspeed");
-            J12306Util.sleep(querySpeed);
+            J12306Util.sleepM(querySpeed);
         }
 
     }

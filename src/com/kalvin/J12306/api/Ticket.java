@@ -5,6 +5,7 @@ import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import com.kalvin.J12306.config.UrlConfig;
 import com.kalvin.J12306.config.UrlsEnum;
+import com.kalvin.J12306.exception.J12306Exception;
 import com.kalvin.J12306.http.Session;
 
 /**
@@ -33,16 +34,35 @@ public class Ticket {
         this.toStation = toStation;
     }
 
-    public HttpResponse query() {
+    private HttpResponse query(String type) {
+        UrlsEnum urlsEnum;
+        switch (type) {
+            case "A":
+                urlsEnum = UrlsEnum.QUERY_A_TICKET;
+                break;
+            case "Z":
+                urlsEnum = UrlsEnum.QUERY_Z_TICKET;
+                break;
+            default:
+                throw new J12306Exception("无效的查票接口");
+        }
         this.session = new Session();
         this.session.setCookie(this.tempCookie);
-        UrlConfig urlConfig = UrlsEnum.QUERY_TICKET.getUrlConfig();
+        UrlConfig urlConfig = urlsEnum.getUrlConfig();
         urlConfig.setUrl(urlConfig.getUrl()
                 .replace("{0}", trainDate)
                 .replace("{1}", this.fromStation)
                 .replace("{2}", this.toStation));
-        UrlsEnum.QUERY_TICKET.setUrlConfig(urlConfig);
+        urlsEnum.setUrlConfig(urlConfig);
 
-        return this.session.httpClient.send(UrlsEnum.QUERY_TICKET);
+        return this.session.httpClient.send(urlsEnum);
+    }
+
+    public HttpResponse queryA() {
+        return this.query("A");
+    }
+
+    public HttpResponse queryZ() {
+        return this.query("Z");
     }
 }

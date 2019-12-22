@@ -91,14 +91,14 @@ public class SubmitOrderRequest {
                             submitTicketInfo
                     ).send();
                 } else {
-                    log.info("订单提交失败，正在重试...错误信息：{}", jsonObject.get("messages"));
+                    log.error("订单提交失败，正在重试...错误信息：{}", jsonObject.get("messages"));
                 }
             }
         } catch (Exception e) {
             if (e instanceof J12306Exception) {
                 throw new J12306Exception(e.getMessage());
             } else {
-                log.info("订单提交异常，正在重试...错误信息：{}", e.getMessage());
+                log.error("订单提交异常，正在重试...错误信息：{}", e.getMessage());
             }
         }
 

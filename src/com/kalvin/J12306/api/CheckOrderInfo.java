@@ -98,7 +98,7 @@ public class CheckOrderInfo {
             if (e instanceof J12306Exception) {
                 throw new J12306Exception(e.getMessage());
             } else {
-                log.info("车票提交异常，正在重试...错误信息：{}", e.getMessage());
+                log.error("车票提交异常，正在重试...错误信息：{}", e.getMessage());
             }
         }
 

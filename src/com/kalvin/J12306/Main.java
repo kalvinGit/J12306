@@ -3,9 +3,8 @@ package com.kalvin.J12306;
 public class Main {
 
     public static void main(String[] args) {
-        // 开始抢票，可开多个
-//        selectTicket1();
-        selectTicket2();
+        // 开始抢票
+        selectTicket1();
     }
 
 

@@ -38,6 +38,15 @@ public class J12306Util {
             Thread.sleep(second * 1000);
         } catch (InterruptedException e) {
             System.out.println("Thread.sleep error = " + e.getMessage());
+            log.error("Thread.sleep error = {}", e.getMessage());
+        }
+    }
+
+    public static void sleepM(int millisecond) {
+        try {
+            Thread.sleep(millisecond);
+        } catch (InterruptedException e) {
+            log.error("Thread.sleep error = {}", e.getMessage());
         }
     }
 

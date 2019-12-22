@@ -106,11 +106,11 @@ public class GetQueueCount {
             } else {
                 // 将此列车加入小黑屋3分钟
                 ticketCache.put(this.trainNum, this.trainNum, Constants.BLACK_ROOM_CACHE_EXP_TIME * 60);
-                log.info("排队失败，错误信息：{}，将此列车{}加入小黑屋3分钟", object.get("messages"), this.trainNum);
+                log.error("排队失败，错误信息：{}，将此列车{}加入小黑屋3分钟", object.get("messages"), this.trainNum);
             }
         } else {
             ticketCache.put(this.trainNum, this.trainNum, Constants.BLACK_ROOM_CACHE_EXP_TIME * 60);
-            log.info("排队失败，错误信息：{}，将此列车{}加入小黑屋3分钟", object.get("messages"), this.trainNum);
+            log.error("排队失败，错误信息：{}，将此列车{}加入小黑屋3分钟", object.get("messages"), this.trainNum);
         }
     }
             
