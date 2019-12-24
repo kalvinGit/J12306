@@ -2,24 +2,29 @@ package com.kalvin.J12306.utils;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpResponse;
 import cn.hutool.json.JSON;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
+import com.kalvin.J12306.api.Ticket;
+import com.kalvin.J12306.config.Constants;
+import com.kalvin.J12306.config.TicketSeatType;
 import com.kalvin.J12306.dto.TicketInfoDTO;
+import com.kalvin.J12306.exception.J12306Exception;
+import com.kalvin.J12306.http.Session;
 
 import java.io.UnsupportedEncodingException;
 import java.math.RoundingMode;
 import java.net.URLDecoder;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * 工具类
@@ -81,6 +86,7 @@ public class J12306Util {
 
             if (StrUtil.isNotEmpty(split[0])) {
                 ticketInfoDTO.setSecretStr(split[0]);
+                ticketInfoDTO.setOnSale("预订".equals(split[1]));
                 ticketInfoDTO.setTrainNo(split[2]);
                 ticketInfoDTO.setTrainNum(split[3]);
                 ticketInfoDTO.setFormStationTelecode(split[6]);
@@ -90,11 +96,12 @@ public class J12306Util {
                 ticketInfoDTO.setLastTime(split[10]);
                 ticketInfoDTO.setLeftTicket(split[12]);
                 ticketInfoDTO.setTrainLocation(split[15]);
-//            ticketInfoDTO.setBusinessSeat(split[32]);   // or 5
+                ticketInfoDTO.setBusinessSeat(split[32]);   // or 5
                 ticketInfoDTO.setL1Seat(split[31]);
                 ticketInfoDTO.setL2Seat(split[30]);
                 ticketInfoDTO.setL1SoftBerth(split[23]);
                 ticketInfoDTO.setL2HardBerth(split[28]);
+                ticketInfoDTO.setSoftSeat(split[24]);
                 ticketInfoDTO.setHardSeat(split[29]);
                 ticketInfoDTO.setNoSeat(split[26]);
                 ticketInfoDTO.setCanAlternate(split[37].equals("1"));
@@ -128,6 +135,79 @@ public class J12306Util {
         final DateTime date = DateUtil.parse(dateStr);
         final SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd yyyy '00:00:00' 'GMT'Z '(中国标准时间)'", Locale.ENGLISH);
         return sdf.format(date);
+    }
+
+    public static boolean hasTicket(String seatInfo) {
+        return (NumberUtil.isNumber(seatInfo) && Integer.parseInt(seatInfo) > 0) || "有".equals(seatInfo);
+    }
+
+    public static LinkedHashMap<String, Boolean> getSeatsTicketInfo(String seats, TicketInfoDTO ticketInfo) {
+        final LinkedHashMap<String, Boolean> linkedHashMap = new LinkedHashMap<>();
+        for (String seat : seats.split(",")) {
+            if (TicketSeatType.L2_SEAT.getCode().equals(seat)) {
+                linkedHashMap.put(TicketSeatType.L2_SEAT.getCode(), J12306Util.hasTicket(ticketInfo.getL2Seat()));
+            }
+            if (TicketSeatType.L1_SEAT.getCode().equals(seat)) {
+                linkedHashMap.put(TicketSeatType.L1_SEAT.getCode(), J12306Util.hasTicket(ticketInfo.getL1Seat()));
+            }
+            if (TicketSeatType.SOFT_SEAT.getCode().equals(seat)) {
+                linkedHashMap.put(TicketSeatType.SOFT_SEAT.getCode(), J12306Util.hasTicket(ticketInfo.getSoftSeat()));
+            }
+            if (TicketSeatType.HARD_SEAT.getCode().equals(seat)) {
+                linkedHashMap.put(TicketSeatType.HARD_SEAT.getCode(), J12306Util.hasTicket(ticketInfo.getHardSeat()));
+            }
+            if (TicketSeatType.SORT_SLEEPER.getCode().equals(seat)) {
+                linkedHashMap.put(TicketSeatType.SORT_SLEEPER.getCode(), J12306Util.hasTicket(ticketInfo.getL1SoftBerth()));
+            }
+            if (TicketSeatType.HARD_SLEEPER.getCode().equals(seat)) {
+                linkedHashMap.put(TicketSeatType.HARD_SLEEPER.getCode(), J12306Util.hasTicket(ticketInfo.getL2HardBerth()));
+            }
+            if (TicketSeatType.SP_SEAT.getCode().equals(seat)) {
+                linkedHashMap.put(TicketSeatType.SP_SEAT.getCode(), J12306Util.hasTicket(ticketInfo.getBusinessSeat()));
+            }
+            if (Constants.NO_SEAT_CODE.equals(seat)) {
+                linkedHashMap.put(TicketSeatType.NO_SEAT.getCode(), J12306Util.hasTicket(ticketInfo.getNoSeat()));
+            }
+        }
+        return linkedHashMap;
+    }
+
+    public static boolean noNeedTicket(LinkedHashMap<String, Boolean> seatsTicketInfo) {
+        for (String seatCode : seatsTicketInfo.keySet()) {
+            if (seatsTicketInfo.get(seatCode)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static String formatDateStr(String dateStr) {
+        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date date = simpleDateFormat.parse(dateStr);
+            return simpleDateFormat.format(date);
+        } catch (ParseException e) {
+            throw new J12306Exception("日期格式不正确");
+        }
+    }
+
+    public static void printlnLeftTicket(String trainDate, String fromStation, String toStation) {
+        HttpResponse httpResponse = new Ticket(new Session(), J12306Util.formatDateStr(trainDate), StationUtil.getStationCode(fromStation), StationUtil.getStationCode(toStation))
+                .queryZ();
+        if (httpResponse.getStatus() == Constants.REQ_SUCCESS_STATUS) {
+            List<TicketInfoDTO> ticketInfoDTOS = J12306Util.parseTicketInfo(httpResponse.body());
+            ticketInfoDTOS.forEach(t -> log.info("出发日期【{}】车次【{}】出发时间【{}】到达时间【{}】", trainDate, t.getTrainNum(), t.getGoOffTime(), t.getArrivalTime()));
+        } else {
+            log.error("无法查询车票信息，状态【{}】", httpResponse.getStatus());
+        }
+    }
+
+    public static String getCurrPreOneMinuteTime() {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        Calendar beforeTime = Calendar.getInstance();
+        beforeTime.add(Calendar.MINUTE, -1);// 1分钟之前的时间
+        Date beforeD = beforeTime.getTime();
+        return sdf.format(beforeD);
     }
 
 }

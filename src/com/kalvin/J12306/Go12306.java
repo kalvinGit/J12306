@@ -1,6 +1,6 @@
 package com.kalvin.J12306;
 
-import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpException;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.json.JSONException;
@@ -21,6 +21,7 @@ import com.kalvin.J12306.utils.J12306Util;
 import com.kalvin.J12306.utils.StationUtil;
 import com.kalvin.J12306.utils.YmlUtil;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -66,7 +67,7 @@ public class Go12306 {
      * @param seats 座席类型：M、O、N
      */
     public Go12306 initBookTicketInfo(String trainDate, String fromStation, String toStation, String trainNums, String seats) {
-        this.trainDate = trainDate;
+        this.trainDate = J12306Util.formatDateStr(trainDate);
         final String fromStationCode = StationUtil.getStationCode(fromStation);
         if (fromStationCode == null) {
             throw new J12306Exception("无法找到始发站站点【" + fromStation + "】，请确保始发站点名正确。");
@@ -141,15 +142,13 @@ public class Go12306 {
                     continue;
                 }
                 for (TicketInfoDTO ticketInfoDTO : ticketInfoDTOS) {
+                    if (!ticketInfoDTO.isOnSale()) {
+                        continue;
+                    }
                     String trainNum = ticketInfoDTO.getTrainNum();
-                    String l1Seat = ticketInfoDTO.getL1Seat();
-                    String l2Seat = ticketInfoDTO.getL2Seat();
-                    String noSeat = ticketInfoDTO.getNoSeat();
                     String canNotAlternateSeatType = ticketInfoDTO.getCanNotAlternateSeatType();
 
-                    boolean hasL1Seat = (NumberUtil.isNumber(l1Seat) && Integer.parseInt(l1Seat) > 0) || "有".equals(l1Seat);
-                    boolean hasL2Seat = (NumberUtil.isNumber(l2Seat) && Integer.parseInt(l2Seat) > 0) || "有".equals(l2Seat);
-                    boolean hasNoSeat = (NumberUtil.isNumber(noSeat) && Integer.parseInt(noSeat) > 0) || "有".equals(noSeat);
+                    final LinkedHashMap<String, Boolean> seatsTicketInfo = J12306Util.getSeatsTicketInfo(this.seats, ticketInfoDTO);
 
                     // 先进行一次解码。避免提交后再编码一次导致参数失效
                     String secretStr = J12306Util.urlDecode(ticketInfoDTO.getSecretStr());
@@ -159,9 +158,9 @@ public class Go12306 {
                     String toStationCode = ticketInfoDTO.getToStationTelecode();
                     String trainLocation = ticketInfoDTO.getTrainLocation();
 
-                    if (hasL1Seat || hasL2Seat || hasNoSeat) {
-                        log.info("可预订车票信息：发车日期：{}，车次：{}，出发时间：{}，到达时间：{}，座席：一等座{}、二等座{}、无座{}",
-                                trainDate, trainNum, ticketInfoDTO.getGoOffTime(), ticketInfoDTO.getArrivalTime(), l1Seat, l2Seat, noSeat);
+                    if (!J12306Util.noNeedTicket(seatsTicketInfo)) {
+                        log.info("可预订车票信息：发车日期【{}】，车次【{}】，出发时间：{}，到达时间：{}，座席：",
+                                trainDate, trainNum, ticketInfoDTO.getGoOffTime(), ticketInfoDTO.getArrivalTime());
                     }
 
                     // 跳过不是购票意向的车次
@@ -169,34 +168,26 @@ public class Go12306 {
                         continue;
                     }
 
-                    // 一等二等无座都没票
-                    if (!hasL1Seat && !hasL2Seat && !hasNoSeat) {
-                        // 候补订单
+                    // 候补订单
+                    if (J12306Util.noNeedTicket(seatsTicketInfo)) {
                         if ((boolean) YmlUtil.get("j12306.ticket.alternate")) {
                             // 判断是否能候补订单
                             if (this.ticketCache.get(trainNo) != null) {
                                 continue;
                             }
-                            if (ticketInfoDTO.isCanAlternate()) {
-                                String seatType = "";
-                                if ("".equals(canNotAlternateSeatType) || !canNotAlternateSeatType.contains(TicketSeatType.L2_SEAT.getCode())) {   // 一等二等座都可候补
-                                    // 候补二等
-                                    seatType = TicketSeatType.L2_SEAT.getCode();
-                                } else if (!canNotAlternateSeatType.contains(TicketSeatType.L1_SEAT.getCode())) {// 一等座可候补
-                                    // 候补一等
-                                    seatType = TicketSeatType.L1_SEAT.getCode();
-                                }
 
-                                // 准备候补，即使候补成功，也会继续抢票
-                                if (!"".equals(seatType)) {
-                                    try {
-                                        log.info("准备提交候补订单：车次：{}，二等座，发车日期：{}，座席类型：{}", trainNum, trainDate, seatType);
-                                        AlternateOrder alternateOrder = new AlternateOrder(this.session, secretStr, seatType, trainNo);
-                                        if (alternateOrder.checkFace()) {
-                                            alternateOrder.getSuccessRate();
+                            if (ticketInfoDTO.isCanAlternate()) {
+                                for (String seatCode : seatsTicketInfo.keySet()) {
+                                    if ("".equals(canNotAlternateSeatType) || !canNotAlternateSeatType.contains(seatCode)) {
+                                        try {
+                                            log.info("准备提交候补订单：车次【{}】，发车日期【{}】，座席类型：{}", trainNum, trainDate, seatCode);
+                                            AlternateOrder alternateOrder = new AlternateOrder(this.session, secretStr, seatCode, trainNo);
+                                            if (alternateOrder.checkFace()) {
+                                                alternateOrder.getSuccessRate();
+                                            }
+                                        } catch (Exception e) {
+                                            log.error("候补异常：{}", e.getMessage());
                                         }
-                                    } catch (Exception e) {
-                                        log.error("候补异常：{}", e.getMessage());
                                     }
                                 }
                             }
@@ -210,54 +201,11 @@ public class Go12306 {
                     }
 
                     try {
-                        /* 优先考虑二等座,其次一等座,最后选择无座 */
-                        if (this.seats.contains(TicketSeatType.L2_SEAT.getCode())) {
-                            // 提交订单
-                            if (hasL2Seat) {
-                                log.info("提交订单：车次：{}，二等座，发车日期：{}，座席类型：{}", trainNum, trainDate, TicketSeatType.L2_SEAT.getName());
-                                new SubmitOrderRequest(
-                                        this.session,
-                                        secretStr,
-                                        TicketSeatType.L2_SEAT.getCode(),
-                                        trainDate,
-                                        fromStationCode,
-                                        toStationCode,
-                                        trainNo,
-                                        trainNum,
-                                        trainLocation
-                                ).send();
-                            }
-                        }
-                        if (this.seats.contains(TicketSeatType.L1_SEAT.getCode())) {
-                            if (hasL1Seat) {
-                                log.info("提交订单：车次：{}，二等座，发车日期：{}，座席类型：{}", trainNum, trainDate, TicketSeatType.L1_SEAT.getName());
-                                new SubmitOrderRequest(
-                                        this.session,
-                                        secretStr,
-                                        TicketSeatType.L1_SEAT.getCode(),
-                                        trainDate,
-                                        fromStationCode,
-                                        toStationCode,
-                                        trainNo,
-                                        trainNum,
-                                        trainLocation
-                                ).send();
-                            }
-                        }
-                        if (this.seats.contains(Constants.NO_SEAT_CODE)) {
-                            if (hasNoSeat) {
-                                log.info("提交订单：车次：{}，二等座，发车日期：{}，座席类型：{}", trainNum, trainDate, TicketSeatType.NO_SEAT.getName());
-                                new SubmitOrderRequest(
-                                        this.session,
-                                        secretStr,
-                                        TicketSeatType.NO_SEAT.getCode(),
-                                        trainDate,
-                                        fromStationCode,
-                                        toStationCode,
-                                        trainNo,
-                                        trainNum,
-                                        trainLocation
-                                ).send();
+                        for (String seatCode : seatsTicketInfo.keySet()) {
+                            if (seatsTicketInfo.get(seatCode)) {
+                                log.info("提交订单：车次【{}】，发车日期【{}】，座席类型：{}", trainNum, trainDate, TicketSeatType.get(seatCode).getName());
+                                new SubmitOrderRequest(this.session, secretStr, seatCode, trainDate, fromStationCode, toStationCode, trainNo, trainNum, trainLocation)
+                                        .send();
                             }
                         }
                     } catch (J12306Exception e) {
@@ -284,6 +232,9 @@ public class Go12306 {
                     }
                 }
             }
+            /*if (!StrUtil.isNullOrUndefined((String) YmlUtil.get("j12306.ticket.puttime")) && J12306Util.getCurrPreOneMinuteTime().equals(YmlUtil.get("j12306.ticket.puttime"))) {
+                J12306Util.sleepM((Integer) YmlUtil.get("j12306.ticket.puttimespeed"));
+            }*/
             J12306Util.sleepM(querySpeed);
         }
 

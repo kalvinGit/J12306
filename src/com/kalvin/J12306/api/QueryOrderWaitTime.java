@@ -7,6 +7,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
+import com.kalvin.J12306.cache.TicketCache;
 import com.kalvin.J12306.config.Constants;
 import com.kalvin.J12306.config.UrlConfig;
 import com.kalvin.J12306.config.UrlsEnum;
@@ -25,17 +26,19 @@ public class QueryOrderWaitTime {
 
     private Session session;
     private String repeatSubmitToken;
+    private String trainNum;
 
-    public QueryOrderWaitTime(Session session, String repeatSubmitToken) {
+    public QueryOrderWaitTime(Session session, String repeatSubmitToken, String trainNum) {
         this.session = session;
         this.repeatSubmitToken = repeatSubmitToken;
+        this.trainNum = trainNum;
     }
 
     public void send() {
         int tryTimes = 0;
         boolean success = false;
         String orderId = "";
-
+        TicketCache ticketCache = TicketCache.getInstance();
         while (true) {
             if (tryTimes >= Constants.MAX_TRY_TIMES) {
                 // 自动取消订单
@@ -47,9 +50,12 @@ public class QueryOrderWaitTime {
                         success = true;
                         break;
                     case MyOrder.State.QUEUE_CODE:
+                    case MyOrder.State.FAIL_CODE:
                         log.info("排队失败，取消订单");
                         myOrder.cancelNoComplete(check.getSequenceNo());
                 }
+                ticketCache.put(this.trainNum, this.trainNum, Constants.BLACK_ROOM_CACHE_EXP_TIME * 60);
+                log.error("排队20次失败。此列车{}加入小黑屋闭关3分钟", this.trainNum);
                 break;
             }
             try {

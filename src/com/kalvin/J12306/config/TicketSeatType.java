@@ -24,6 +24,15 @@ public enum  TicketSeatType {
         this.name = name;
     }
 
+    public static TicketSeatType get(String code) {
+        for (TicketSeatType ticketSeatType : TicketSeatType.values()) {
+            if (ticketSeatType.getCode().equals(code)) {
+                return ticketSeatType;
+            }
+        }
+        throw new RuntimeException("无效的code：" + code);
+    }
+
     public String getCode() {
         return code;
     }

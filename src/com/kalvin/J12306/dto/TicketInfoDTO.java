@@ -6,6 +6,7 @@ package com.kalvin.J12306.dto;
  */
 public class TicketInfoDTO {
 
+    private boolean onSale; // 是否开售
     private String secretStr;   // 密钥串
     private String trainNo;     // 列车号
     private String trainNum;    // 车次
@@ -19,15 +20,24 @@ public class TicketInfoDTO {
     private String leftTicket;
     private String trainLocation;
 
-    private String businessSeat;    // 商务座
+    private String businessSeat;    // 商务特等座
     private String l1Seat;  // 一等座
     private String l2Seat;  // 二等座
     private String l1SoftBerth; // 软卧一等卧
     private String l2HardBerth; // 硬卧二等卧
     private String hardSeat;    // 硬座
+    private String softSeat;    // 软座
     private String noSeat;      // 无座
     private boolean canAlternate;   // 是否可候补。1代表能候补
     private String canNotAlternateSeatType; // 不能候补的座席
+
+    public boolean isOnSale() {
+        return onSale;
+    }
+
+    public void setOnSale(boolean onSale) {
+        this.onSale = onSale;
+    }
 
     public String getSecretStr() {
         return secretStr;
@@ -173,6 +183,14 @@ public class TicketInfoDTO {
         this.hardSeat = hardSeat;
     }
 
+    public String getSoftSeat() {
+        return softSeat;
+    }
+
+    public void setSoftSeat(String softSeat) {
+        this.softSeat = softSeat;
+    }
+
     public String getNoSeat() {
         return noSeat;
     }
@@ -218,6 +236,7 @@ public class TicketInfoDTO {
                 ", l1SoftBerth='" + l1SoftBerth + '\'' +
                 ", l2HardBerth='" + l2HardBerth + '\'' +
                 ", hardSeat='" + hardSeat + '\'' +
+                ", softSeat='" + softSeat + '\'' +
                 ", noSeat='" + noSeat + '\'' +
                 ", canAlternate=" + canAlternate +
                 ", canNotAlternateSeatType='" + canNotAlternateSeatType + '\'' +

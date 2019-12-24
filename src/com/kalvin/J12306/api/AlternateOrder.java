@@ -174,6 +174,9 @@ public class AlternateOrder {
                 .replace("{0}", this.trainNo)
                 .replace("{1}", this.seatType));
         formData.put("lkParam", "");
+        formData.put("sessionId", "");
+        formData.put("sig", "");
+        formData.put("scene", "nc_login");
         return formData;
     }
 

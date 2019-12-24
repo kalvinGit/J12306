@@ -35,7 +35,7 @@ public class ConfirmSingleForQueue {
     private boolean isNeedCode;
     private SubmitTicketInfoDTO submitTicketInfoDTO;
 
-    public ConfirmSingleForQueue(Session session, String repeatSubmitToken, String passengerTicketStr, 
+    public ConfirmSingleForQueue(Session session, String repeatSubmitToken, String passengerTicketStr,
                                  String oldPassengerStr, String trainNum, String trainLocation, int ifShowPassCodeTime,
                                  boolean isNeedCode, SubmitTicketInfoDTO submitTicketInfoDTO) {
         this.session = session;
@@ -105,7 +105,8 @@ public class ConfirmSingleForQueue {
                 if (parse.getByPath("status") != null && (boolean) parse.getByPath("data.submitStatus")) {
                     new QueryOrderWaitTime(
                             this.session,
-                            this.repeatSubmitToken
+                            this.repeatSubmitToken,
+                            this.trainNum
                     ).send();
                 } else {
                     ticketCache.put(this.trainNum, this.trainNum, Constants.BLACK_ROOM_CACHE_EXP_TIME * 60);

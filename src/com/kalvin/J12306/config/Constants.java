@@ -38,6 +38,6 @@ public class Constants {
 
     public final static String THREAD_STOP = "STOP";
 
-    public final static String UPDATE_LOG_DEVICE_ERROR_MSG = "RAIL_EXPIRATION值已失效，需要更新获取设备信息的LOG_DEVICE接口参数，请到Login.java类的fillLogDeviceUrlParams方法中更新";
+    public final static String UPDATE_LOG_DEVICE_ERROR_MSG = "请再重试登录多次，如果还报这个错可能RAIL_EXPIRATION值已失效，需要更新获取设备信息的LOG_DEVICE接口参数，请到Login.java类的fillLogDeviceUrlParams方法中更新";
 
 }

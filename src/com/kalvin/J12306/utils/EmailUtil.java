@@ -35,4 +35,8 @@ public class EmailUtil {
             log.error("无法通过邮件通知您，请检查config.yml配置文件，确保邮件相关配置正确！error：" + e.getMessage());
         }
     }
+
+    public static void sendTest() {
+        EmailUtil.send("J12306邮件配置测试", "测试邮件是否能发送成功！收到邮件证明邮件信息配置正确！");
+    }
 }
