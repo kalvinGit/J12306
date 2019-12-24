@@ -6,10 +6,7 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.json.JSONException;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
-import com.kalvin.J12306.api.AlternateOrder;
-import com.kalvin.J12306.api.Login;
-import com.kalvin.J12306.api.SubmitOrderRequest;
-import com.kalvin.J12306.api.Ticket;
+import com.kalvin.J12306.api.*;
 import com.kalvin.J12306.cache.TicketCache;
 import com.kalvin.J12306.config.Constants;
 import com.kalvin.J12306.config.TicketSeatType;
@@ -115,6 +112,7 @@ public class Go12306 {
 
         int queryA302Count = 0, queryZ302Count = 0;
         String usingQuery = (String) YmlUtil.get("j12306.ticket.queryp");
+        boolean isPutTime = false;
         stopLop: while (true) {
             HttpResponse httpResponse;
             try {
@@ -175,18 +173,23 @@ public class Go12306 {
                             if (this.ticketCache.get(trainNo) != null) {
                                 continue;
                             }
-
                             if (ticketInfoDTO.isCanAlternate()) {
+                                final String allEncStr = new PassengerDTOS(this.session).getPassengerEncStr();
                                 for (String seatCode : seatsTicketInfo.keySet()) {
                                     if ("".equals(canNotAlternateSeatType) || !canNotAlternateSeatType.contains(seatCode)) {
                                         try {
                                             log.info("准备提交候补订单：车次【{}】，发车日期【{}】，座席类型：{}", trainNum, trainDate, seatCode);
-                                            AlternateOrder alternateOrder = new AlternateOrder(this.session, secretStr, seatCode, trainNo);
+                                            AlternateOrder alternateOrder = new AlternateOrder(this.session, ticketInfoDTO.getSecretStr(), allEncStr, seatCode, trainNo);
                                             if (alternateOrder.checkFace()) {
                                                 alternateOrder.getSuccessRate();
                                             }
                                         } catch (Exception e) {
-                                            log.error("候补异常：{}", e.getMessage());
+                                            if (e instanceof J12306Exception) {
+                                                log.info("抢票程序结束");
+                                                break stopLop;
+                                            }
+                                            log.error("候补异常：{}，列车【】加入小黑屋关闭3分钟", e.getMessage(), trainNum);
+                                            ticketCache.put(trainNo, trainNo, Constants.BLACK_ROOM_CACHE_EXP_TIME * 60);
                                         }
                                     }
                                 }
@@ -232,9 +235,17 @@ public class Go12306 {
                     }
                 }
             }
-            /*if (!StrUtil.isNullOrUndefined((String) YmlUtil.get("j12306.ticket.puttime")) && J12306Util.getCurrPreOneMinuteTime().equals(YmlUtil.get("j12306.ticket.puttime"))) {
-                J12306Util.sleepM((Integer) YmlUtil.get("j12306.ticket.puttimespeed"));
-            }*/
+            String puttime = (String) YmlUtil.get("j12306.ticket.puttime");
+            if (!StrUtil.isNullOrUndefined(puttime)) {
+                if (J12306Util.getCurrAftOneMinuteTime().equals(puttime.replace("-", ":"))) {
+                    isPutTime = true;
+                    querySpeed = (Integer) YmlUtil.get("j12306.ticket.puttimespeed");
+                }
+            }
+            if (isPutTime && J12306Util.getAfter5MinuteTime(puttime.replace("-", ":")).equals(J12306Util.getCurrTime())) {
+                isPutTime = false;
+                querySpeed = (Integer) YmlUtil.get("j12306.ticket.queryspeed");
+            }
             J12306Util.sleepM(querySpeed);
         }
 

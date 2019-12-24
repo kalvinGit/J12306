@@ -10,6 +10,7 @@ import com.kalvin.J12306.cache.TicketCache;
 import com.kalvin.J12306.config.Constants;
 import com.kalvin.J12306.config.UrlsEnum;
 import com.kalvin.J12306.dto.UserInfoDTO;
+import com.kalvin.J12306.exception.J12306Exception;
 import com.kalvin.J12306.http.Session;
 import com.kalvin.J12306.utils.EmailUtil;
 import com.kalvin.J12306.utils.J12306Util;
@@ -26,14 +27,16 @@ public class AlternateOrder {
 
     private Session session;
     private String secretStr;
+    private String allEncStr;
     private String seatType;
     private String trainNo;
     private String jzdhDateE;
     private String jzdhHourE;
 
-    public AlternateOrder(Session session, String secretStr, String seatType, String trainNo) {
+    public AlternateOrder(Session session, String secretStr, String allEncStr, String seatType, String trainNo) {
         this.session = session;
         this.secretStr = secretStr;
+        this.allEncStr = allEncStr;
         this.seatType = seatType;
         this.trainNo = trainNo;
     }
@@ -141,10 +144,14 @@ public class AlternateOrder {
             String body = httpResponse.body();
             JSON parse = JSONUtil.parse(body);
             if ((boolean) parse.getByPath("status")) {
-                EmailUtil.send("12306候补成功", "恭喜您候补成功，请立即打开浏览器登录12306，访问‘候补订单’，在30分钟内完成支付!");
-                break;
+                log.info("恭喜您候补订单成功，请立即打开浏览器登录12306，访问‘候补订单’，在30分钟内完成支付!");
+                EmailUtil.send("12306候补成功", "恭喜您候补订单成功，请立即打开浏览器登录12306，访问‘候补订单’，在30分钟内完成支付!");
+                throw new J12306Exception(Constants.THREAD_STOP);
+            } else {
+                log.info(parse.getByPath("messages") + parse.getByPath("validateMessages").toString());
             }
             i++;
+            log.info("正在候补排队{}次", i);
             J12306Util.sleep(1);
         }
     }
@@ -187,6 +194,6 @@ public class AlternateOrder {
         return passengerInfo
                 .replace("{name}", userInfoDTO.getName())
                 .replace("{idNo}", userInfoDTO.getIdNo())
-                .replace("{encStr}", userInfoDTO.getUserEncStr());
+                .replace("{encStr}", this.allEncStr);
     }
 }

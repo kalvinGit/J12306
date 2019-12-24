@@ -202,12 +202,23 @@ public class J12306Util {
         }
     }
 
-    public static String getCurrPreOneMinuteTime() {
+    public static String getCurrAftOneMinuteTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-        Calendar beforeTime = Calendar.getInstance();
-        beforeTime.add(Calendar.MINUTE, -1);// 1分钟之前的时间
-        Date beforeD = beforeTime.getTime();
+        Calendar afterTime = Calendar.getInstance();
+        afterTime.add(Calendar.MINUTE, 1);// 1分钟之后的时间
+        Date beforeD = afterTime.getTime();
         return sdf.format(beforeD);
+    }
+
+    public static String getAfter5MinuteTime(String time) {
+        DateTime dateTime = DateUtil.parse(DateUtil.formatDate(DateUtil.date()) + " " + time);
+        Calendar calendar = DateUtil.calendar(dateTime);
+        calendar.add(Calendar.MINUTE, 5);
+        return DateUtil.format(calendar.getTime(), "HH:mm");
+    }
+
+    public static String getCurrTime() {
+        return DateUtil.format(DateUtil.date(), "HH:mm");
     }
 
 }

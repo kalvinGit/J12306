@@ -3,6 +3,7 @@ package com.kalvin.J12306.api;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.json.JSON;
+import cn.hutool.json.JSONException;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.log.Log;
@@ -109,21 +110,21 @@ public class Login {
     private String fillLogDeviceUrlParams(String url) {
         final StringBuilder sb = new StringBuilder();
         /**
-         * 如果RAIL_DEVICEID失效了，以下参数需要更新
+         * 如果RAIL_DEVICEID失效了，以下参数需要更新（顺序一定要对，不然找不到logdevice）
          * 更新步骤：
          * 1.浏览器访问：https://kyfw.12306.cn/otn/login/init
-         * 2.清除浏览器缓存的有关12306.cn和kyfw.12306.cn的Cookie（谷歌浏览器点击浏览器地址栏的小锁）
-         * 3.按f12进入调试模式并点击Network选项
-         * 4.按f5重新刷新
+         * 2.按f12进入调试模式并点击Network选项
+         * 3.清除浏览器缓存的有关12306.cn和kyfw.12306.cn的Cookie（谷歌浏览器点击浏览器地址栏的小锁）
+         * 4.按f5重新刷新(只有第1次刷新才有出现，所以不要刷新2次)
          * 5.在Network选项下找到logdevice请求，点击它，在Headers选项下拉到最下面就可以找到如下几个参数，复制替换它即可
          */
-        final String algID = "mY8X82D4zg";
-        final String hashCode = "OAfXG7as4gjaQMpz49SFm-f5NXRJ4iZkL_qvduWcz88";
-        final String EOQP = "4902a61a235fbb59700072139347967d";
+        final String algID = "PyvGQGRrn7";
+        final String hashCode = "zgwkwwmfXov0h0OiTVGEm5O3x8wCUon2_s6JFyCUmFE";
+        final String EOQP = "8f58b1186770646318a429cb33977d8c";
         final String jp76 = "52d67b2a5aa5e031084733d5006cc664";
         final String q5aJ = "-8";
         final String Oaew = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36";
-        final String E3gR = "c51a977fae84c6c216d2d364e42cdef0";
+        final String E3gR = "662690cce73ebaa8bae40c90cd3a15d5";
 
         new LinkedHashMap<String, Object>() {{
             put("algID", algID);
@@ -189,12 +190,15 @@ public class Login {
         log.info("postUamTK http status = {}", httpResponse.getStatus());
         String body = httpResponse.body();
 //        log.info("postUamTK body = {}", body);
-
-        JSONObject jsonObject = JSONUtil.parseObj(body);
-        Integer resultCode = (Integer) jsonObject.get("result_code");
-        if (resultCode == 0) {
-            this.session.token = (String) jsonObject.get("newapptk");
-            return this.postUamAuthClient();
+        try {
+            JSONObject jsonObject = JSONUtil.parseObj(body);
+            Integer resultCode = (Integer) jsonObject.get("result_code");
+            if (resultCode == 0) {
+                this.session.token = (String) jsonObject.get("newapptk");
+                return this.postUamAuthClient();
+            }
+        } catch (JSONException je) {
+            return false;
         }
         return false;
     }
@@ -210,9 +214,13 @@ public class Login {
         this.session.setCookie(cookies);
 
         String body = httpResponse.body();
-        JSONObject jsonObject = JSONUtil.parseObj(body);
-        Integer resultCode = (Integer) jsonObject.get("result_code");
-        return resultCode == 0;
+        try {
+            JSONObject jsonObject = JSONUtil.parseObj(body);
+            Integer resultCode = (Integer) jsonObject.get("result_code");
+            return resultCode == 0;
+        } catch (JSONException e) {
+            return false;
+        }
     }
 
     /**
